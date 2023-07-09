@@ -1,6 +1,7 @@
 import { login, logout, getInfo } from '@/api/user'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 import router, { resetRouter } from '@/router'
+import { getCaptcha } from '@/api/captcha'
 
 const state = {
   token: getToken(),
@@ -29,11 +30,24 @@ const mutations = {
 }
 
 const actions = {
+  // get captcha
+  getCaptcha({ commit }) {
+    return new Promise((resolve, reject) => {
+      getCaptcha().then(response => {
+        const { data } = response
+        commit('SET_IMAGE', data.image)
+        commit('SET_CHALLENGE', data.challenge)
+        resolve(data)
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
   // user login
   login({ commit }, userInfo) {
-    const { username, password , captcha} = userInfo
+    const { username, password, captcha } = userInfo
     return new Promise((resolve, reject) => {
-      login({ username: username.trim(),captcha:captcha, password: password }).then(response => {
+      login({ username: username.trim(), captcha: captcha, password: password }).then(response => {
         const { data } = response
         commit('SET_TOKEN', data.token)
         setToken(data.token)

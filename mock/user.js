@@ -24,9 +24,34 @@ const users = {
 }
 
 module.exports = [
+  // get captcha
+  {
+    url: '/captcha',
+    type: 'get',
+    response: config => {
+      const { image, challenge } = config.query
+      const data = {
+        image: image,
+        challenge: challenge
+      }
+
+      // mock error
+      if (!data) {
+        return {
+          code: 50008,
+          message: 'Get captcha failed.'
+        }
+      }
+
+      return {
+        code: 20000,
+        data: data
+      }
+    }
+  },
   // user login
   {
-    url: '/vue-element-admin/user/login',
+    url: '/login',
     type: 'post',
     response: config => {
       const { username } = config.body
@@ -49,7 +74,7 @@ module.exports = [
 
   // get user info
   {
-    url: '/vue-element-admin/user/info\.*',
+    url: '/user/info\.*',
     type: 'get',
     response: config => {
       const { token } = config.query
@@ -72,7 +97,7 @@ module.exports = [
 
   // user logout
   {
-    url: '/vue-element-admin/user/logout',
+    url: '/logout',
     type: 'post',
     response: _ => {
       return {

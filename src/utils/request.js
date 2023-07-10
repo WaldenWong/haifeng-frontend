@@ -1,12 +1,13 @@
 import axios from 'axios'
-import { MessageBox, Message } from 'element-ui'
+import { Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
+import qs from 'qs' // 比如{id:1, name: 'xxx'} -> id=1&name=xxx
 
 // create an axios instance
 const service = axios.create({
   // baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
-  baseURL:"http://127.0.0.1:8000/api/",
+  baseURL: 'http://127.0.0.1:8000/api/',
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 5000 // request timeout
 })
@@ -70,7 +71,7 @@ service.interceptors.response.use(
     //   }
     //   return Promise.reject(new Error(res.message || 'Error'))
     // } else {
-      return res
+    return res
     // }
   },
   error => {
@@ -85,3 +86,85 @@ service.interceptors.response.use(
 )
 
 export default service
+
+// method 封装
+export function get(url, params) {
+  return service({
+    method: 'get',
+    url,
+    params,
+    timeout: 10000,
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  })
+}
+
+/*
+post请求，提交数据为json
+*/
+export function post(url, data) {
+  return service({
+    method: 'post',
+    url,
+    data,
+    timeout: 10000,
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+      'Content-Type': 'application/x-www-from-urlencoded; charset=UTF-8'
+    }
+  })
+}
+
+/*
+post请求，提交数据为查询字符串，key=val&key=val
+*/
+export function post_string(url, data) {
+  return service({
+    method: 'post',
+    url,
+    data: qs.stringify(data),
+    timeout: 10000,
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+      'Content-Type': 'application/x-www-from-urlencoded; charset=UTF-8'
+    }
+  })
+}
+
+/*
+post请求，提交数据为查询字符串，对象中嵌套数组的格式
+{
+  id:1,
+  roles:[xxx, yyy]
+}
+*/
+export function post_obj_array(url, data) {
+  return service({
+    method: 'post',
+    url,
+    data: qs.stringify(data, { allowDots: true }),
+    timeout: 10000,
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+      'Content-Type': 'application/x-www-from-urlencoded; charset=UTF-8'
+    }
+  })
+}
+
+/*
+post请求，提交数据为查询字符串，转换成分配对应式
+{ids:[1,2]} -> ids=1&ids=2
+*/
+export function post_array(url, data) {
+  return service({
+    method: 'post',
+    url,
+    data: qs.stringify(data, { arrayFormat: 'repeat' }),
+    timeout: 10000,
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+      'Content-Type': 'application/x-www-from-urlencoded; charset=UTF-8'
+    }
+  })
+}

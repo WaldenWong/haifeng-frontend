@@ -52,6 +52,17 @@ const actions = {
       let accessedRoutes
       if (roles.includes('admin')) {
         accessedRoutes = asyncRoutes || []
+      } else if (roles.includes('user')) {
+        // 新建数组存放路由
+        var routers = []
+        // 获取asyncRouters的权限进行判断是否显示
+        asyncRoutes.forEach((router) => {
+          if (router.meta && router.meta.roles && router.meta.roles.includes('user')) {
+            // 将含有user角色的路由加入数组
+            routers.push(router)
+          }
+        })
+        accessedRoutes = routers || []
       } else {
         accessedRoutes = filterAsyncRoutes(asyncRoutes, roles)
       }

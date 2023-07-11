@@ -20,12 +20,13 @@ function hasPermission(roles, route) {
  */
 export function filterAsyncRoutes(routes, roles) {
   const res = []
-
+  // xxx.forEach 遍历
   routes.forEach(route => {
+    // 每一个路由使用tmp 变量存储
     const tmp = { ...route }
     if (hasPermission(roles, tmp)) {
       if (tmp.children) {
-        tmp.children = filterAsyncRoutes(tmp.children, roles)
+        tmp.children = filterAsyncRoutes(tmp.children, roles)  // 递归路由与用户角色权限，找出符合权限的路由
       }
       res.push(tmp)
     }
@@ -35,8 +36,8 @@ export function filterAsyncRoutes(routes, roles) {
 }
 
 const state = {
-  routes: [],
-  addRoutes: []
+  routes: [], // 静态路由规则 + 当前用户可访问的动态路由规则
+  addRoutes: [] // 当前用户访问的动态路由规则
 }
 
 const mutations = {
@@ -47,23 +48,14 @@ const mutations = {
 }
 
 const actions = {
+  // 动态生成需要权限的动态路由规则
   generateRoutes({ commit }, roles) {
     return new Promise(resolve => {
       let accessedRoutes
       if (roles.includes('admin')) {
         accessedRoutes = asyncRoutes || []
-      } else if (roles.includes('user')) {
-        // 新建数组存放路由
-        var routers = []
-        // 获取asyncRouters的权限进行判断是否显示
-        asyncRoutes.forEach((router) => {
-          if (router.meta && router.meta.roles && router.meta.roles.includes('user')) {
-            // 将含有user角色的路由加入数组
-            routers.push(router)
-          }
-        })
-        accessedRoutes = routers || []
       } else {
+        // asyncRouters，所有的权限路由， roles 当前用户角色
         accessedRoutes = filterAsyncRoutes(asyncRoutes, roles)
       }
       commit('SET_ROUTES', accessedRoutes)

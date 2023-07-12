@@ -58,19 +58,22 @@
         </el-form-item>
       </el-tooltip>
 
-      <el-form-item prop="captcha">
+      <el-form-item prop="answer">
         <span class="svg-container">
-          <i class="el-icon-soccer"></i>
+          <i class="el-icon-soccer"> </i>
         </span>
         <el-input
-          ref="captcha"
-          v-model="loginForm.captcha"
+          ref="answer"
+          v-model="loginForm.answer"
           placeholder="请输入验证码"
-          name="captcha"
+          name="answer"
           type="text"
           tabindex="1"
           autocomplete="on"
         />
+        <span @click="getCaptcha">
+          <img :src="captchaImg" class="captcha" />
+        </span>
       </el-form-item>
 
       <el-button
@@ -110,6 +113,7 @@
 <script>
 import { validUsername } from '@/utils/validate'
 import SocialSign from './components/SocialSignin'
+import { getCaptcha } from '@/api/captcha'
 
 export default {
   name: 'Login',
@@ -129,9 +133,9 @@ export default {
         callback()
       }
     }
-    const validateCaptcha = (rule, value, callback) => {
-      if (value.length > 4) {
-        callback(new Error('The captcha can not be more than 4 digits'))
+    const validateAnswer = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('Please enter the captcha'))
       } else {
         callback()
       }
@@ -140,7 +144,8 @@ export default {
       loginForm: {
         username: 'admin',
         password: 'admin1234',
-        captcha: 'abcd'
+        answer: '',
+        challenge: ''
       },
       loginRules: {
         username: [
@@ -149,16 +154,15 @@ export default {
         password: [
           { required: true, trigger: 'blur', validator: validatePassword }
         ],
-        captcha: [
-          { required: true, trigger: 'blur', validator: validateCaptcha }
-        ]
+        answer: [{ required: true, trigger: 'blur', validator: validateAnswer }]
       },
       passwordType: 'password',
       capsTooltip: false,
       loading: false,
       showDialog: false,
       redirect: undefined,
-      otherQuery: {}
+      otherQuery: {},
+      captchaImg: ''
     }
   },
   watch: {
@@ -181,12 +185,23 @@ export default {
       this.$refs.username.focus()
     } else if (this.loginForm.password === '') {
       this.$refs.password.focus()
+    } else if (this.loginForm.answer === '') {
+      this.$refs.answer.focus()
     }
+    // 初始化验证码
+    this.getCaptcha()
   },
   destroyed() {
     // window.removeEventListener('storage', this.afterQRScan)
   },
   methods: {
+    // 获取验证码
+    getCaptcha() {
+      getCaptcha().then((res) => {
+        this.captchaImg = 'data:image/img;base64,' + res.data.image
+        this.loginForm.challenge = res.data.challenge
+      })
+    },
     checkCapslock(e) {
       const { key } = e
       this.capsTooltip = key && key.length === 1 && key >= 'A' && key <= 'Z'
@@ -338,6 +353,12 @@ $light_gray: #eee;
     vertical-align: middle;
     width: 30px;
     display: inline-block;
+  }
+  .captcha {
+    position: absolute;
+    right: 7px;
+    top: 8px;
+    width: 90px;
   }
 
   .title-container {

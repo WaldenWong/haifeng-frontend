@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-//Vue是个插件需要use，相当于实例化
+// Vue是个插件需要use，相当于实例化
 Vue.use(Router)
 
 /* Layout */
@@ -135,15 +135,15 @@ export const constantRoutes = [
  */
 export const asyncRoutes = [
   {
-    path: '/waiter',
+    path: '/goods',
     component: Layout,
-    meta: { roles: ['admin'] },
+    meta: { roles: ['admin', 'goods:view'] },
     children: [
       {
         path: 'index',
-        component: () => import('@/views/waiters/index'),
-        name: 'Waiters',
-        meta: { title: '员工管理', icon: 'icon', noCache: true }
+        component: () => import('@/views/goods/goods-list'),
+        name: 'Goods',
+        meta: { title: '商品信息', icon: 'icon', noCache: true }
       }
     ]
   },
@@ -228,7 +228,11 @@ export const asyncRoutes = [
         path: 'edit/:id(\\d+)',
         component: () => import('@/views/example/edit'),
         name: 'EditArticle',
-        meta: { title: 'Edit Article', noCache: true, activeMenu: '/example/list' },
+        meta: {
+          title: 'Edit Article',
+          noCache: true,
+          activeMenu: '/example/list'
+        },
         hidden: true
       },
       {
@@ -405,11 +409,12 @@ export const asyncRoutes = [
   { path: '*', redirect: '/404', hidden: true }
 ]
 
-const createRouter = () => new Router({
-  // mode: 'history', // require service support
-  scrollBehavior: () => ({ y: 0 }),
-  routes: constantRoutes
-})
+const createRouter = () =>
+  new Router({
+    // mode: 'history', // require service support
+    scrollBehavior: () => ({ y: 0 }),
+    routes: constantRoutes
+  })
 
 const router = createRouter()
 

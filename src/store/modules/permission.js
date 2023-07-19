@@ -7,7 +7,7 @@ import { asyncRoutes, constantRoutes } from '@/router'
  */
 function hasPermission(roles, route) {
   if (route.meta && route.meta.roles) {
-    return roles.some(role => route.meta.roles.includes(role))
+    return roles.some((role) => route.meta.roles.includes(role))
   } else {
     return true
   }
@@ -20,13 +20,13 @@ function hasPermission(roles, route) {
  */
 export function filterAsyncRoutes(routes, roles) {
   const res = []
-  // xxx.forEach 遍历
-  routes.forEach(route => {
+  // arrayObject.forEach 遍历
+  routes.forEach((route) => {
     // 每一个路由使用tmp 变量存储
     const tmp = { ...route }
     if (hasPermission(roles, tmp)) {
       if (tmp.children) {
-        tmp.children = filterAsyncRoutes(tmp.children, roles)  // 递归路由与用户角色权限，找出符合权限的路由
+        tmp.children = filterAsyncRoutes(tmp.children, roles) // 递归路由与用户角色权限，找出符合权限的路由
       }
       res.push(tmp)
     }
@@ -50,7 +50,7 @@ const mutations = {
 const actions = {
   // 动态生成需要权限的动态路由规则
   generateRoutes({ commit }, roles) {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       let accessedRoutes
       if (roles.includes('admin')) {
         accessedRoutes = asyncRoutes || []

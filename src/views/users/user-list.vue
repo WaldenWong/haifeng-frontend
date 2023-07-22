@@ -1,6 +1,5 @@
 <template>
   <div class="app-container">
-    <!-- 搜索栏 -->
     <div class="filter-container">
       <el-input
         v-model="listQuery.title"
@@ -10,11 +9,25 @@
         @keyup.enter.native="handleFilter"
       />
       <el-select
+        v-model="listQuery.importance"
+        placeholder="Imp"
+        clearable
+        style="width: 90px"
+        class="filter-item"
+      >
+        <el-option
+          v-for="item in importanceOptions"
+          :key="item"
+          :label="item"
+          :value="item"
+        />
+      </el-select>
+      <el-select
         v-model="listQuery.type"
         placeholder="Type"
         clearable
         class="filter-item"
-        style="width: 130px; margin-left: 10px"
+        style="width: 130px"
       >
         <el-option
           v-for="item in calendarTypeOptions"
@@ -23,17 +36,9 @@
           :value="item.key"
         />
       </el-select>
-      <el-date-picker
-        v-model="listQuery.date"
-        placeholder="Date"
-        clearable
-        class="filter-item"
-        style="width: 130px; margin-left: 10px"
-      >
-      </el-date-picker>
       <el-select
         v-model="listQuery.sort"
-        style="width: 140px; margin-left: 10px"
+        style="width: 140px"
         class="filter-item"
         @change="handleFilter"
       >
@@ -48,7 +53,6 @@
         v-waves
         class="filter-item"
         type="primary"
-        style="margin-left: 10px"
         icon="el-icon-search"
         @click="handleFilter"
       >
@@ -73,6 +77,14 @@
       >
         Export
       </el-button>
+      <el-checkbox
+        v-model="showReviewer"
+        class="filter-item"
+        style="margin-left: 15px"
+        @change="tableKey = tableKey + 1"
+      >
+        reviewer
+      </el-checkbox>
     </div>
     <!-- 加载表 -->
     <el-table
@@ -97,49 +109,22 @@
           <span>{{ row.id }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="商品名" min-width="300px">
+      <el-table-column label="Date" width="150px" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.name }}</span>
+          <span>{{ row.timestamp | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="商品编号" width="150px" align="center">
+      <el-table-column label="Title" min-width="150px">
         <template slot-scope="{ row }">
-          <span>{{ row.identifier }}</span>
+          <span class="link-type" @click="handleUpdate(row)">{{
+            row.title
+          }}</span>
+          <el-tag>{{ row.type | typeFilter }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="商品种类" width="110px" align="center">
+      <el-table-column label="Author" width="110px" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.type }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="进价" width="110px" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.purchase_price }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="售价" width="110px" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.selling_price }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="库存" width="110px" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.inventory }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="销量" width="110px" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.sales_volume }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="供应商" width="200px" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.sales_volume }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="入库时间" width="250px" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.purchase_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+          <span>{{ row.author }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -152,45 +137,79 @@
           <span style="color: red">{{ row.reviewer }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="Imp" width="80px">
+        <template slot-scope="{ row }">
+          <svg-icon
+            v-for="n in +row.importance"
+            :key="n"
+            icon-class="star"
+            class="meta-item__icon"
+          />
+        </template>
+      </el-table-column>
+      <el-table-column label="Readings" align="center" width="95">
+        <template slot-scope="{ row }">
+          <span
+            v-if="row.pageviews"
+            class="link-type"
+            @click="handleFetchPv(row.pageviews)"
+            >{{ row.pageviews }}</span
+          >
+          <span v-else>0</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="Status" class-name="status-col" width="100">
+        <template slot-scope="{ row }">
+          <el-tag :type="row.status | statusFilter">
+            {{ row.status }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column
-        label="操作"
+        label="Actions"
         align="center"
-        width="170"
+        width="230"
         class-name="small-padding fixed-width"
       >
         <template slot-scope="{ row, $index }">
-          <span>
-            <i class="el-icon-edit-outline" @click="handleUpdate(row)"
-          /></span>
-          <span style="margin-left: 15px">
-            <i class="el-icon-document" />
-          </span>
-          <span style="margin-left: 15px">
-            <i
-              class="el-icon-delete"
-              v-if="row.status != 'deleted'"
-              type="danger"
-              style="color: red"
-              @click="handleDelete(row, $index)"
-          /></span>
+          <el-button type="primary" size="mini" @click="handleUpdate(row)">
+            Edit
+          </el-button>
+          <el-button
+            v-if="row.status != 'published'"
+            size="mini"
+            type="success"
+            @click="handleModifyStatus(row, 'published')"
+          >
+            Publish
+          </el-button>
+          <el-button
+            v-if="row.status != 'draft'"
+            size="mini"
+            @click="handleModifyStatus(row, 'draft')"
+          >
+            Draft
+          </el-button>
+          <el-button
+            v-if="row.status != 'deleted'"
+            size="mini"
+            type="danger"
+            @click="handleDelete(row, $index)"
+          >
+            Delete
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
-    <!-- 翻页按钮 -->
-    <!-- <div :class="{ hidden: hidden }" class="pagination-container">
-      <el-pagination
-        :background="background"
-        :current-page.sync="currentPage"
-        :page-size.sync="pageSize"
-        :layout="layout"
-        :page-sizes="pageSizes"
-        :total="total"
-        v-bind="$attrs"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
-    </div> -->
-    <!-- 添加等对话框 -->
+
+    <pagination
+      v-show="total > 0"
+      :total="total"
+      :page.sync="listQuery.page"
+      :limit.sync="listQuery.limit"
+      @pagination="getList"
+    />
+
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form
         ref="dataForm"
@@ -265,17 +284,29 @@
         </el-button>
       </div>
     </el-dialog>
+
+    <el-dialog :visible.sync="dialogPvVisible" title="Reading statistics">
+      <el-table
+        :data="pvData"
+        border
+        fit
+        highlight-current-row
+        style="width: 100%"
+      >
+        <el-table-column prop="key" label="Channel" />
+        <el-table-column prop="pv" label="Pv" />
+      </el-table>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="dialogPvVisible = false"
+          >Confirm</el-button
+        >
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import {
-  addGoods,
-  updateGoods,
-  goodsList,
-  goodsMenu,
-  deleteGoods
-} from '@/api/goods'
+import { addUser, updateUser, userList, userMenu, deleteUser } from '@/api/user'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
 import Pagination from '@/components/Pagination' // secondary package based on el-pagination
@@ -313,11 +344,11 @@ export default {
   data() {
     return {
       tableKey: 0,
-      list: [],
+      list: null,
       total: 0,
       listLoading: true,
       listQuery: {
-        date: undefined,
+        importance: undefined,
         title: undefined,
         type: undefined,
         page: 1,
@@ -327,8 +358,8 @@ export default {
       importanceOptions: [1, 2, 3],
       calendarTypeOptions,
       sortOptions: [
-        { label: 'ID Ascending', key: 'asc' },
-        { label: 'ID Descending', key: 'desc' }
+        { label: 'ID Ascending', key: '+id' },
+        { label: 'ID Descending', key: '-id' }
       ],
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
@@ -374,12 +405,14 @@ export default {
   methods: {
     getList() {
       this.listLoading = true
-      goodsList(this.listQuery).then((response) => {
-        this.list = response.data
+      userList(this.listQuery).then((response) => {
+        this.list = response.data.items
+        this.total = response.data.total_pages
+
         // Just to simulate the time of the request
         setTimeout(() => {
           this.listLoading = false
-        }, 1.5 * 10)
+        }, 1.5 * 100)
       })
     },
     handleFilter() {
@@ -395,13 +428,15 @@ export default {
     },
     sortChange(data) {
       const { prop, order } = data
-      this.sortByID(order)
+      if (prop === 'id') {
+        this.sortByID(order)
+      }
     },
     sortByID(order) {
       if (order === 'ascending') {
-        this.listQuery.sort = 'asc'
+        this.listQuery.sort = '+id'
       } else {
-        this.listQuery.sort = 'desc'
+        this.listQuery.sort = '-id'
       }
       this.handleFilter()
     },
@@ -510,8 +545,9 @@ export default {
         })
       )
     },
-    getSortClass: function () {
-      return this.listQuery.sort
+    getSortClass: function (key) {
+      const sort = this.listQuery.sort
+      return sort === `+${key}` ? 'ascending' : 'descending'
     }
   }
 }

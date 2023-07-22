@@ -60,7 +60,7 @@
 
       <el-form-item prop="answer">
         <span class="svg-container">
-          <i class="el-icon-soccer"> </i>
+          <i class="el-icon-soccer" />
         </span>
         <el-input
           ref="answer"

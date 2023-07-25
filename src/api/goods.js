@@ -1,5 +1,12 @@
 import request from '@/utils/request'
 
+export function goodsTypes() {
+  return request({
+    url: '/goods/types',
+    method: 'get'
+  })
+}
+
 export function addGoods(data) {
   return request({
     url: '/goods/add',
@@ -16,9 +23,9 @@ export function updateGoods(data) {
   })
 }
 
-export function goodsMenu(params) {
+export function goodsItems(params) {
   return request({
-    url: '/goods/menu',
+    url: '/goods/items',
     method: 'get',
     params: params
   })

@@ -180,6 +180,7 @@ export default {
   created() {
     // window.addEventListener('storage', this.afterQRScan)
   },
+  // 加载页面就进行操作
   mounted() {
     if (this.loginForm.username === '') {
       this.$refs.username.focus()
@@ -188,7 +189,7 @@ export default {
     } else if (this.loginForm.answer === '') {
       this.$refs.answer.focus()
     }
-    // 初始化验证码
+    // 获取验证码
     this.getCaptcha()
   },
   destroyed() {

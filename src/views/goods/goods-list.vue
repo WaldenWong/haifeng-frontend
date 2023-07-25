@@ -17,7 +17,7 @@
         style="width: 130px; margin-left: 10px"
       >
         <el-option
-          v-for="item in calendarTypeOptions"
+          v-for="item in goodsTypeOptions"
           :key="item.key"
           :label="item.display_name + '(' + item.key + ')'"
           :value="item.key"
@@ -91,7 +91,7 @@
         sortable="custom"
         align="center"
         width="80"
-        :class-name="getSortClass('id')"
+        :class-name="listQuery.sort"
       >
         <template slot-scope="{ row }">
           <span>{{ row.id }}</span>
@@ -139,7 +139,7 @@
       </el-table-column>
       <el-table-column label="入库时间" width="250px" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.purchase_at | parseTime('{y}-{m}-{d} {h}:{i}') }}</span>
+          <span>{{ row.purchase_at }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -160,15 +160,15 @@
       >
         <template slot-scope="{ row, $index }">
           <span>
-            <i class="el-icon-edit-outline" @click="handleUpdate(row)"
-          /></span>
+            <i class="el-icon-edit-outline" @click="handleUpdate(row)"></i
+          ></span>
           <span style="margin-left: 15px">
-            <i class="el-icon-document" />
+            <i class="el-icon-document"></i>
           </span>
           <span style="margin-left: 15px">
             <i
+              v-if="row.status !== 'deleted'"
               class="el-icon-delete"
-              v-if="row.status != 'deleted'"
               type="danger"
               style="color: red"
               @click="handleDelete(row, $index)"
@@ -190,78 +190,129 @@
         @current-change="handleCurrentChange"
       />
     </div> -->
-    <!-- 添加等对话框 -->
+
+    <!-- 添加add对话框 -->
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form
         ref="dataForm"
         :rules="rules"
-        :model="temp"
-        label-position="left"
-        label-width="70px"
-        style="width: 400px; margin-left: 50px"
+        :model="addData"
+        label-position="right"
+        label-width="80px"
+        style="width: 280px; margin-left: 50px"
       >
-        <el-form-item label="Type" prop="type">
+        <el-form-item label="商品名" prop="name">
+          <el-input v-model="addData.name" />
+        </el-form-item>
+        <el-form-item label="商品编号" prop="identifier">
+          <el-input
+            v-model="addData.identifier"
+            :autosize="{ minRows: 3, maxRows: 15 }"
+          />
+        </el-form-item>
+        <el-form-item label="商品种类" prop="type">
           <el-select
-            v-model="temp.type"
+            v-model="addData.type"
             class="filter-item"
             placeholder="Please select"
           >
             <el-option
-              v-for="item in calendarTypeOptions"
+              v-for="item in goodsTypeOptions"
+              :label="item.display_name"
+              :value="item.key"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="进价" prop="purchase_price">
+          <el-input
+            v-model="addData.purchase_price"
+            clearable
+            @input="
+              (value) => {
+                isNaN(value)
+                  ? isNaN(parseFloat(value))
+                    ? (addData.purchase_price = null)
+                    : (addData.purchase_price = parseFloat(value).toFixed(2))
+                  : (addData.purchase_price = value)
+              }
+            "
+          />
+        </el-form-item>
+        <el-form-item label="售价" prop="selling_price">
+          <el-input
+            v-model="addData.selling_price"
+            type="number"
+            clearable
+            @input="
+              (value) => {
+                isNaN(value)
+                  ? isNaN(parseFloat(value))
+                    ? (addData.selling_price = null)
+                    : (addData.selling_price = parseFloat(value).toFixed(2))
+                  : (addData.selling_price = value)
+              }
+            "
+          />
+        </el-form-item>
+        <el-form-item label="库存" prop="inventory">
+          <el-input
+            v-model="addData.inventory"
+            clearable
+            @input="
+              (value) => {
+                isNaN(value)
+                  ? isNaN(parseInt(value))
+                    ? (addData.inventory = null)
+                    : (addData.inventory = parseInt(value))
+                  : (addData.inventory = value)
+              }
+            "
+          />
+        </el-form-item>
+        <el-form-item label="销量" prop="sales_volume">
+          <el-input
+            v-model="addData.sales_volume"
+            clearable
+            @input="
+              (value) => {
+                isNaN(value)
+                  ? isNaN(parseInt(value))
+                    ? (addData.sales_volume = null)
+                    : (addData.sales_volume = parseInt(value))
+                  : (addData.sales_volume = value)
+              }
+            "
+          />
+        </el-form-item>
+        <el-form-item label="供应商" prop="supplier">
+          <el-select
+            v-model="addData.supplier"
+            class="filter-item"
+            placeholder="Please select"
+          >
+            <el-option
+              v-for="item in supplierOptions"
               :key="item.key"
               :label="item.display_name"
               :value="item.key"
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="Date" prop="timestamp">
+        <el-form-item label="入库时间" prop="purchase_at">
           <el-date-picker
-            v-model="temp.timestamp"
+            v-model="addData.purchase_at"
             type="datetime"
             placeholder="Please pick a date"
           />
         </el-form-item>
-        <el-form-item label="Title" prop="title">
-          <el-input v-model="temp.title" />
-        </el-form-item>
-        <el-form-item label="Status">
-          <el-select
-            v-model="temp.status"
-            class="filter-item"
-            placeholder="Please select"
-          >
-            <el-option
-              v-for="item in statusOptions"
-              :key="item"
-              :label="item"
-              :value="item"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Imp">
-          <el-rate
-            v-model="temp.importance"
-            :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
-            :max="3"
-            style="margin-top: 8px"
-          />
-        </el-form-item>
-        <el-form-item label="Remark">
-          <el-input
-            v-model="temp.remark"
-            :autosize="{ minRows: 2, maxRows: 4 }"
-            type="textarea"
-            placeholder="Please input"
-          />
-        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false"> Cancel </el-button>
+        <el-button @click="dialogFormVisible = false"> 取 消 </el-button>
         <el-button
           type="primary"
-          @click="dialogStatus === 'create' ? createData() : updateData()"
+          @click="dialogStatus === 'add' ? addGoods() : updateGoods()"
         >
-          Confirm
+          提 交
         </el-button>
       </div>
     </el-dialog>
@@ -270,32 +321,24 @@
 
 <script>
 import {
+  goodsTypes,
   addGoods,
   updateGoods,
-  goodsList,
-  goodsMenu,
-  deleteGoods
+  goodsList
+  // goodsItems,
+  // deleteGoods
 } from '@/api/goods'
+import { supplierItems } from '@/api/supplier'
 import waves from '@/directive/waves' // waves directive
 import { parseTime } from '@/utils'
-import Pagination from '@/components/Pagination' // secondary package based on el-pagination
-
-const calendarTypeOptions = [
-  { key: 'CN', display_name: 'China' },
-  { key: 'US', display_name: 'USA' },
-  { key: 'JP', display_name: 'Japan' },
-  { key: 'EU', display_name: 'Eurozone' }
-]
-
-// arr to obj, such as { CN : "China", US : "USA" }
-const calendarTypeKeyValue = calendarTypeOptions.reduce((acc, cur) => {
-  acc[cur.key] = cur.display_name
-  return acc
-}, {})
+import { fetchPv } from '@/api/article'
+// import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
 export default {
-  name: 'ComplexTable',
-  components: { Pagination },
+  name: 'GoodsTable',
+  components: {
+    // Pagination
+  },
   directives: { waves },
   filters: {
     statusFilter(status) {
@@ -316,6 +359,26 @@ export default {
       list: [],
       total: 0,
       listLoading: true,
+      addData: {
+        name: undefined,
+        identifier: undefined,
+        type: new Object(),
+        purchase_price: undefined,
+        selling_price: undefined,
+        inventory: undefined,
+        sales_volume: undefined,
+        supplier: undefined,
+        purchase_at: new Date()
+      },
+      updateData: {
+        type: undefined,
+        purchase_price: undefined,
+        selling_price: undefined,
+        inventory: undefined,
+        sales_volume: undefined,
+        supplier: undefined,
+        purchase_at: new Date()
+      },
       listQuery: {
         date: undefined,
         title: undefined,
@@ -324,28 +387,28 @@ export default {
         page_size: 20,
         sort: 'desc'
       },
-      importanceOptions: [1, 2, 3],
-      calendarTypeOptions,
+      supplierOptions: [],
+      goodsTypeOptions: [],
       sortOptions: [
         { label: 'ID Ascending', key: 'asc' },
         { label: 'ID Descending', key: 'desc' }
       ],
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
-      temp: {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        type: '',
-        status: 'published'
-      },
+      // temp: {
+      //   id: undefined,
+      //   importance: 1,
+      //   remark: '',
+      //   timestamp: new Date(),
+      //   title: '',
+      //   type: '',
+      //   status: 'published'
+      // },
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
-        update: 'Edit',
-        create: 'Create'
+        update: '编辑商品',
+        add: '添加商品'
       },
       dialogPvVisible: false,
       pvData: [],
@@ -371,6 +434,8 @@ export default {
   created() {
     this.getList()
   },
+  // 加载页面就进行操作
+  mounted() {},
   methods: {
     getList() {
       this.listLoading = true
@@ -418,19 +483,44 @@ export default {
     },
     handleCreate() {
       this.resetTemp()
-      this.dialogStatus = 'create'
+      this.dialogStatus = 'add'
       this.dialogFormVisible = true
       this.$nextTick(() => {
         this.$refs['dataForm'].clearValidate()
       })
+      this.getGoodsTypes()
+      this.getSupplier()
+      // 清空输入框
     },
-    createData() {
-      this.$refs['dataForm'].validate((valid) => {
+    getGoodsTypes() {
+      goodsTypes().then((res) => {
+        this.goodsTypeOptions = []
+        for (let i = 0; i < res.data.length; i++) {
+          this.goodsTypeOptions.push({
+            key: res.data[i].key,
+            display_name: res.data[i].display_name
+          })
+        }
+      })
+    },
+    getSupplier() {
+      supplierItems().then((res) => {
+        this.supplierOptions = []
+        for (let i = 0; i < res.data.length; i++) {
+          this.supplierOptions.push({
+            key: res.data[i].id,
+            display_name: res.data[i].name
+          })
+        }
+      })
+    },
+    addGoods() {
+      this.$refs.dataForm.validate((valid) => {
         if (valid) {
-          this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
-          this.temp.author = 'vue-element-admin'
-          createArticle(this.temp).then(() => {
-            this.list.unshift(this.temp)
+          // this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
+          // this.temp.author = 'vue-element-admin'
+          addGoods(this.addData).then(() => {
+            this.list.unshift(this.addData)
             this.dialogFormVisible = false
             this.$notify({
               title: 'Success',
@@ -451,12 +541,12 @@ export default {
         this.$refs['dataForm'].clearValidate()
       })
     },
-    updateData() {
+    updateGoods() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           const tempData = Object.assign({}, this.temp)
           tempData.timestamp = +new Date(tempData.timestamp) // change Thu Nov 30 2017 16:41:05 GMT+0800 (CST) to 1512031311464
-          updateArticle(tempData).then(() => {
+          updateGoods(tempData).then(() => {
             const index = this.list.findIndex((v) => v.id === this.temp.id)
             this.list.splice(index, 1, this.temp)
             this.dialogFormVisible = false
@@ -509,10 +599,10 @@ export default {
           }
         })
       )
-    },
-    getSortClass: function () {
-      return this.listQuery.sort
     }
+    // getSortClass: function () {
+    //   return this.listQuery.sort
+    // }
   }
 }
 </script>

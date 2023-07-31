@@ -68,7 +68,7 @@
           placeholder="请输入验证码"
           name="answer"
           type="text"
-          tabindex="1"
+          tabindex="3"
           autocomplete="on"
         />
         <span @click="getCaptcha">
@@ -232,6 +232,7 @@ export default {
             })
             .catch(() => {
               this.loading = false
+              this.getCaptcha()
             })
         } else {
           console.log('error submit!!')

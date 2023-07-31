@@ -31,7 +31,7 @@
         style="width: 130px; margin-left: 10px"
       >
       </el-date-picker>
-      <el-select
+      <!-- <el-select
         v-model="listQuery.sort"
         style="width: 140px; margin-left: 10px"
         class="filter-item"
@@ -43,7 +43,7 @@
           :label="item.label"
           :value="item.key"
         />
-      </el-select>
+      </el-select> -->
       <el-button
         v-waves
         class="filter-item"
@@ -85,24 +85,19 @@
       style="width: 100%"
       @sort-change="sortChange"
     >
-      <el-table-column
-        label="ID"
-        prop="id"
-        sortable="custom"
-        align="center"
-        width="80"
-        :class-name="listQuery.sort"
-      >
-        <template slot-scope="{ row }">
-          <span>{{ row.id }}</span>
-        </template>
-      </el-table-column>
       <el-table-column label="商品名" min-width="300px">
         <template slot-scope="{ row }">
           <span>{{ row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="商品编号" width="150px" align="center">
+      <el-table-column
+        label="商品编号"
+        prop="identifier"
+        width="150px"
+        align="center"
+        sortable="custom"
+        :class-name="listQuery.sort"
+      >
         <template slot-scope="{ row }">
           <span>{{ row.identifier }}</span>
         </template>
@@ -137,7 +132,14 @@
           <span>{{ row.sales_volume }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="入库时间" width="250px" align="center">
+      <el-table-column
+        label="入库时间"
+        prop="purchase_at"
+        width="250px"
+        align="center"
+        sortable="custom"
+        :class-name="listQuery.sort"
+      >
         <template slot-scope="{ row }">
           <span>{{ row.purchase_at }}</span>
         </template>
@@ -202,10 +204,11 @@
         style="width: 280px; margin-left: 50px"
       >
         <el-form-item label="商品名" prop="name">
-          <el-input v-model="addData.name" />
+          <el-input name="name" v-model="addData.name" />
         </el-form-item>
         <el-form-item label="商品编号" prop="identifier">
           <el-input
+            name="identifier"
             v-model="addData.identifier"
             :autosize="{ minRows: 3, maxRows: 15 }"
           />
@@ -292,7 +295,6 @@
           >
             <el-option
               v-for="item in supplierOptions"
-              :key="item.key"
               :label="item.display_name"
               :value="item.key"
             />
@@ -354,6 +356,13 @@ export default {
     }
   },
   data() {
+    const validateGoodsName = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('Please enter the goods name'))
+      } else {
+        callback()
+      }
+    }
     return {
       tableKey: 0,
       list: [],
@@ -362,13 +371,13 @@ export default {
       addData: {
         name: undefined,
         identifier: undefined,
-        type: new Object(),
+        type: undefined,
         purchase_price: undefined,
         selling_price: undefined,
         inventory: undefined,
         sales_volume: undefined,
         supplier: undefined,
-        purchase_at: new Date()
+        purchase_at: new Date().getTimezoneOffset()
       },
       updateData: {
         type: undefined,
@@ -385,25 +394,17 @@ export default {
         type: undefined,
         page: 1,
         page_size: 20,
-        sort: 'desc'
+        sort: 'desc',
+        sort_k: 'purchase_at'
       },
       supplierOptions: [],
       goodsTypeOptions: [],
-      sortOptions: [
-        { label: 'ID Ascending', key: 'asc' },
-        { label: 'ID Descending', key: 'desc' }
-      ],
+      // sortOptions: [
+      //   { label: 'ID Ascending', key: 'asc' },
+      //   { label: 'ID Descending', key: 'desc' }
+      // ],
       statusOptions: ['published', 'draft', 'deleted'],
       showReviewer: false,
-      // temp: {
-      //   id: undefined,
-      //   importance: 1,
-      //   remark: '',
-      //   timestamp: new Date(),
-      //   title: '',
-      //   type: '',
-      //   status: 'published'
-      // },
       dialogFormVisible: false,
       dialogStatus: '',
       textMap: {
@@ -413,29 +414,32 @@ export default {
       dialogPvVisible: false,
       pvData: [],
       rules: {
-        type: [
-          { required: true, message: 'type is required', trigger: 'change' }
-        ],
-        timestamp: [
-          {
-            type: 'date',
-            required: true,
-            message: 'timestamp is required',
-            trigger: 'change'
-          }
-        ],
-        title: [
-          { required: true, message: 'title is required', trigger: 'blur' }
+        name: [
+          { required: true, trigger: 'blur', validator: validateGoodsName }
         ]
+        // type: [
+        //   { required: true, message: 'type is required', trigger: 'change' }
+        // ],
+        // supplier: [
+        //   { required: true, message: 'supplier is required', trigger: 'change' }
+        // ],
+        // purchase_at: [
+        //   {
+        //     type: 'datetime',
+        //     required: true,
+        //     message: 'purchase_at is required',
+        //     trigger: 'change'
+        //   }
+        // ]
       },
       downloadLoading: false
     }
   },
-  created() {
+  created() {},
+  // 加载页面就进行操作
+  mounted() {
     this.getList()
   },
-  // 加载页面就进行操作
-  mounted() {},
   methods: {
     getList() {
       this.listLoading = true
@@ -460,37 +464,39 @@ export default {
     },
     sortChange(data) {
       const { prop, order } = data
+      this.listQuery.sort_k = prop
       this.sortByID(order)
     },
     sortByID(order) {
-      if (order === 'ascending') {
-        this.listQuery.sort = 'asc'
-      } else {
+      if (order === 'descending') {
         this.listQuery.sort = 'desc'
+      } else {
+        this.listQuery.sort = 'asc'
       }
       this.handleFilter()
     },
-    resetTemp() {
-      this.temp = {
-        id: undefined,
-        importance: 1,
-        remark: '',
-        timestamp: new Date(),
-        title: '',
-        status: 'published',
-        type: ''
+    resetAddData() {
+      this.addData = {
+        name: undefined,
+        identifier: undefined,
+        type: undefined,
+        purchase_price: undefined,
+        selling_price: undefined,
+        inventory: undefined,
+        sales_volume: undefined,
+        supplier: undefined,
+        purchase_at: new Date().getTimezoneOffset()
       }
     },
     handleCreate() {
-      this.resetTemp()
+      this.resetAddData()
       this.dialogStatus = 'add'
       this.dialogFormVisible = true
       this.$nextTick(() => {
-        this.$refs['dataForm'].clearValidate()
+        this.$refs.dataForm.clearValidate()
       })
       this.getGoodsTypes()
       this.getSupplier()
-      // 清空输入框
     },
     getGoodsTypes() {
       goodsTypes().then((res) => {
@@ -519,16 +525,22 @@ export default {
         if (valid) {
           // this.temp.id = parseInt(Math.random() * 100) + 1024 // mock a id
           // this.temp.author = 'vue-element-admin'
-          addGoods(this.addData).then(() => {
-            this.list.unshift(this.addData)
-            this.dialogFormVisible = false
-            this.$notify({
-              title: 'Success',
-              message: 'Created Successfully',
-              type: 'success',
-              duration: 2000
+          addGoods(this.addData)
+            .then((res) => {
+              if (res.code === 200) {
+                this.list.unshift(this.addData)
+                this.dialogFormVisible = false
+                this.$notify({
+                  title: 'Success',
+                  message: 'Created Successfully',
+                  type: 'success',
+                  duration: 2000
+                })
+              }
             })
-          })
+            .catch((error) => {
+              console.log(error)
+            })
         }
       })
     },

@@ -355,3 +355,22 @@ export function removeClass(ele, cls) {
     ele.className = ele.className.replace(reg, ' ')
   }
 }
+
+export function fomatTime(date) {
+  if (date == "" || !date) {
+    return "";
+  }
+  var _date = new Date(date);
+  var y = _date.getFullYear();
+  var m = _date.getMonth() + 1;
+  m = m < 10 ? ('0' + m) : m;
+  var d = _date.getDate();
+  d = d < 10 ? ('0' + d) : d;
+  var h = _date.getHours();
+  h = h < 10 ? ('0' + h) : h;
+  var minute = _date.getMinutes();
+  minute = minute < 10 ? ('0' + minute) : minute;
+  var second = _date.getSeconds();
+  second = second < 10 ? ('0' + second) : second;
+  return y + '-' + m + '-' + d + ' ' + h + ':' + minute + ':' + second ;
+}

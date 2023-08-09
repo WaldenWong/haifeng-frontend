@@ -303,6 +303,7 @@
         <el-form-item label="入库时间" prop="purchase_at">
           <el-date-picker
             v-model="addData.purchase_at"
+            value-format="yyyy-MM-dd HH:mm:ss"
             type="datetime"
             placeholder="Please pick a date"
           />
@@ -332,7 +333,7 @@ import {
 } from '@/api/goods'
 import { supplierItems } from '@/api/supplier'
 import waves from '@/directive/waves' // waves directive
-import { parseTime } from '@/utils'
+import { parseTime, fomatTime } from '@/utils'
 import { fetchPv } from '@/api/article'
 // import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
@@ -377,7 +378,7 @@ export default {
         inventory: undefined,
         sales_volume: undefined,
         supplier: undefined,
-        purchase_at: new Date().getTimezoneOffset()
+        purchase_at: fomatTime(new Date())
       },
       updateData: {
         type: undefined,
@@ -386,7 +387,7 @@ export default {
         inventory: undefined,
         sales_volume: undefined,
         supplier: undefined,
-        purchase_at: new Date()
+        purchase_at: fomatTime(new Date())
       },
       listQuery: {
         date: undefined,
@@ -485,7 +486,7 @@ export default {
         inventory: undefined,
         sales_volume: undefined,
         supplier: undefined,
-        purchase_at: new Date().getTimezoneOffset()
+        purchase_at: fomatTime(new Date())
       }
     },
     handleCreate() {

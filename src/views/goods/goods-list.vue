@@ -124,12 +124,12 @@
       </el-table-column>
       <el-table-column label="销量" width="110px" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.sales_volume }}</span>
+          <span>{{ row.sales }}</span>
         </template>
       </el-table-column>
       <el-table-column label="供应商" width="200px" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.sales_volume }}</span>
+          <span>{{ row.sales }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -161,12 +161,15 @@
         class-name="small-padding fixed-width"
       >
         <template slot-scope="{ row, $index }">
+          <!-- 编辑 -->
           <span>
             <i class="el-icon-edit-outline" @click="handleUpdate(row)"></i
           ></span>
+          <!-- 查看 -->
           <span style="margin-left: 15px">
             <i class="el-icon-document"></i>
           </span>
+          <!-- 删除 -->
           <span style="margin-left: 15px">
             <i
               v-if="row.status !== 'deleted'"
@@ -272,17 +275,17 @@
             "
           />
         </el-form-item>
-        <el-form-item label="销量" prop="sales_volume">
+        <el-form-item label="销量" prop="sales">
           <el-input
-            v-model="addData.sales_volume"
+            v-model="addData.sales"
             clearable
             @input="
               (value) => {
                 isNaN(value)
                   ? isNaN(parseInt(value))
-                    ? (addData.sales_volume = null)
-                    : (addData.sales_volume = parseInt(value))
-                  : (addData.sales_volume = value)
+                    ? (addData.sales = null)
+                    : (addData.sales = parseInt(value))
+                  : (addData.sales = value)
               }
             "
           />
@@ -327,14 +330,15 @@ import {
   goodsTypes,
   addGoods,
   updateGoods,
-  goodsList
+  goodsList,
   // goodsItems,
-  // deleteGoods
+  deleteGoods
 } from '@/api/goods'
 import { supplierItems } from '@/api/supplier'
 import waves from '@/directive/waves' // waves directive
 import { parseTime, fomatTime } from '@/utils'
 import { fetchPv } from '@/api/article'
+import { collectCoverageFrom } from 'jest.config'
 // import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
 export default {
@@ -376,7 +380,7 @@ export default {
         purchase_price: undefined,
         selling_price: undefined,
         inventory: undefined,
-        sales_volume: undefined,
+        sales: undefined,
         supplier: undefined,
         purchase_at: fomatTime(new Date())
       },
@@ -385,7 +389,7 @@ export default {
         purchase_price: undefined,
         selling_price: undefined,
         inventory: undefined,
-        sales_volume: undefined,
+        sales: undefined,
         supplier: undefined,
         purchase_at: fomatTime(new Date())
       },
@@ -484,7 +488,7 @@ export default {
         purchase_price: undefined,
         selling_price: undefined,
         inventory: undefined,
-        sales_volume: undefined,
+        sales: undefined,
         supplier: undefined,
         purchase_at: fomatTime(new Date())
       }
@@ -529,11 +533,18 @@ export default {
           addGoods(this.addData)
             .then((res) => {
               if (res.code === 200) {
+                if (this.addData.type === 'meat') {
+                  this.addData.type = '肉'
+                } else if (this.addData.type === 'vegetable') {
+                  this.addData.type = '蔬菜'
+                } else if (this.addData.type === 'dry_goods') {
+                  this.addData.type = '干货'
+                }
                 this.list.unshift(this.addData)
-                this.dialogFormVisible = false
+                this.dialogFormVisible = false //对话框可见
                 this.$notify({
                   title: 'Success',
-                  message: 'Created Successfully',
+                  message: 'Create Successfully',
                   type: 'success',
                   duration: 2000
                 })
@@ -574,13 +585,21 @@ export default {
       })
     },
     handleDelete(row, index) {
-      this.$notify({
-        title: 'Success',
-        message: 'Delete Successfully',
-        type: 'success',
-        duration: 2000
-      })
-      this.list.splice(index, 1)
+      deleteGoods({ id: row.id })
+        .then((res) => {
+          if (res.code === 200) {
+            this.list.splice(index, 1)
+            this.$notify({
+              title: 'Success',
+              message: 'delete Successfully',
+              type: 'success',
+              duration: 2000
+            })
+          }
+        })
+        .catch((error) => {
+          console.log(error)
+        })
     },
     handleFetchPv(pv) {
       fetchPv(pv).then((response) => {

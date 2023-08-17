@@ -48,7 +48,6 @@
             autocomplete="on"
             @keyup.native="checkCapslock"
             @blur="capsTooltip = false"
-            @keyup.enter.native="handleLogin"
           />
           <span class="show-pwd" @click="showPwd">
             <svg-icon
@@ -70,6 +69,7 @@
           type="text"
           tabindex="3"
           autocomplete="on"
+          @keyup.enter.native="handleLogin"
         />
         <span @click="getCaptcha">
           <img :src="captchaImg" class="captcha" />

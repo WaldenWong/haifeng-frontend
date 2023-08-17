@@ -338,6 +338,7 @@ import { supplierItems } from '@/api/supplier'
 import waves from '@/directive/waves' // waves directive
 import { parseTime, fomatTime } from '@/utils'
 import { fetchPv } from '@/api/article'
+import { collectCoverageFrom } from 'jest.config'
 // import Pagination from '@/components/Pagination' // secondary package based on el-pagination
 
 export default {

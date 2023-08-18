@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <!-- 搜索栏 -->
+    <!-- 搜索栏. -->
     <div class="filter-container">
       <el-input
         v-model="listQuery.title"

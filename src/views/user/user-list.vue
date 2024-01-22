@@ -85,77 +85,44 @@
       style="width: 100%"
       @sort-change="sortChange"
     >
-      <el-table-column label="图片" min-width="120px" align="center">
-        <!-- slot-scope: 关联定义获取到的后端数据 -->
+      <el-table-column label="用户名" align="center">
         <template slot-scope="{ row }">
-          <img
-            class="wscnph"
-            src="https://wpimg.wallstcn.com/a0c9d811-1ef9-4628-8976-f7c1aaa66da0.png"
-            width="70px"
-            height="70px"
-          />
-          <!-- <img>{{ row.image }}</span> -->
+          <span>{{ row.username }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="商品名" align="center">
+      <el-table-column label="真实姓名" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.name }}</span>
+          <span>{{ row.real_name }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="电话" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.phone }}</span>
         </template>
       </el-table-column>
       <el-table-column
-        label="商品编号"
-        prop="identifier"
-        width="150px"
-        align="center"
-        sortable="custom"
-        :class-name="listQuery.sort"
-      >
-        <template slot-scope="{ row }">
-          <span>{{ row.identifier }}</span>
-        </template>
-      </el-table-column>
-      <!-- <el-table-column label="商品种类" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.type }}</span>
-        </template>
-      </el-table-column> -->
-      <el-table-column label="进价" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.purchase_price }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="售价" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.selling_price }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="库存" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.inventory }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="销量" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.sales }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="供应商" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.supplier }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="入库时间"
-        prop="updated_on"
+        label="账号过期时间"
+        prop="stopped_on"
         width="250px"
         align="center"
         sortable="custom"
         :class-name="listQuery.sort"
       >
         <template slot-scope="{ row }">
-          <span>{{ row.updated_on }}</span>
+          <span>{{ row.stopped_on }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="创建人" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.creator }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="是否启用" width="110px" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.activated }}</span>
+        </template>
+      </el-table-column>
+
       <el-table-column
         v-if="showReviewer"
         label="Reviewer"
@@ -177,7 +144,7 @@
           <!-- <span>
             <i class="el-icon-edit-outline" @click="handleUpdate(row)"></i
           ></span> -->
-          <!-- 查看 -->
+          <!-- 详情 -->
           <span style="margin-left: 15px">
             <i class="el-icon-search" @click="handleUpdate(row)"></i>
           </span>

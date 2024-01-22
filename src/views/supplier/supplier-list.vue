@@ -85,75 +85,66 @@
       style="width: 100%"
       @sort-change="sortChange"
     >
-      <el-table-column label="图片" min-width="120px" align="center">
-        <!-- slot-scope: 关联定义获取到的后端数据 -->
-        <template slot-scope="{ row }">
-          <img
-            class="wscnph"
-            src="https://wpimg.wallstcn.com/a0c9d811-1ef9-4628-8976-f7c1aaa66da0.png"
-            width="70px"
-            height="70px"
-          />
-          <!-- <img>{{ row.image }}</span> -->
-        </template>
-      </el-table-column>
-      <el-table-column label="商品名" align="center">
+      <el-table-column label="商家名" align="center">
         <template slot-scope="{ row }">
           <span>{{ row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column
-        label="商品编号"
-        prop="identifier"
-        width="150px"
-        align="center"
-        sortable="custom"
-        :class-name="listQuery.sort"
-      >
+      <el-table-column label="经营者名" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.identifier }}</span>
+          <span>{{ row.manager }}</span>
         </template>
       </el-table-column>
-      <!-- <el-table-column label="商品种类" align="center">
+      <el-table-column label="地址" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.type }}</span>
+          <span>{{ row.address }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="电话" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.phone }}</span>
+        </template>
+      </el-table-column>
+      <!-- <el-table-column label="备用电话" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.alternative_phone }}</span>
         </template>
       </el-table-column> -->
-      <el-table-column label="进价" align="center">
+      <!-- <el-table-column label="座机" align="center">
         <template slot-scope="{ row }">
-          <span>{{ row.purchase_price }}</span>
+          <span>{{ row.landline }}</span>
         </template>
-      </el-table-column>
-      <el-table-column label="售价" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.selling_price }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="库存" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.inventory }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="销量" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.sales }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="供应商" align="center">
-        <template slot-scope="{ row }">
-          <span>{{ row.supplier }}</span>
-        </template>
-      </el-table-column>
+      </el-table-column> -->
       <el-table-column
-        label="入库时间"
-        prop="updated_on"
+        label="建立联系时间"
+        prop="contact_at"
         width="250px"
         align="center"
         sortable="custom"
         :class-name="listQuery.sort"
       >
         <template slot-scope="{ row }">
-          <span>{{ row.updated_on }}</span>
+          <span>{{ row.contact_at }}</span>
+        </template>
+      </el-table-column>
+      <!-- <el-table-column label="开户行" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.bank_name }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="银行账户" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.bank_name }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="银行账户名" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.bank_name }}</span>
+        </template>
+      </el-table-column> -->
+      <el-table-column label="是否启用" min-width="30px" align="center">
+        <template slot-scope="{ row }">
+          <span>{{ row.activated }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -177,7 +168,7 @@
           <!-- <span>
             <i class="el-icon-edit-outline" @click="handleUpdate(row)"></i
           ></span> -->
-          <!-- 查看 -->
+          <!-- 详情  -->
           <span style="margin-left: 15px">
             <i class="el-icon-search" @click="handleUpdate(row)"></i>
           </span>

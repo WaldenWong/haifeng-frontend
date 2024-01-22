@@ -83,7 +83,7 @@ export const constantRoutes = [
       {
         path: 'dashboard',
         component: () => import('@/views/dashboard/index'),
-        name: 'Dashboard',
+        name: '首页',
         meta: { title: '首页', icon: 'dashboard', affix: true }
       }
     ]
@@ -155,6 +155,42 @@ export const asyncRoutes = [
           icon: 'component',
           noCache: true,
           roles: ['admin', 'goods:view']
+        }
+      }
+    ]
+  },
+  {
+    path: '/supplier',
+    component: Layout,
+    name: 'SupplierManage',
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/supplier/supplier-list'),
+        name: 'Supplier',
+        meta: {
+          title: '供应商管理',
+          icon: 'shopping',
+          noCache: true,
+          roles: ['admin', 'supplier:view']
+        }
+      }
+    ]
+  },
+  {
+    path: '/user',
+    component: Layout,
+    name: 'UserManage',
+    children: [
+      {
+        path: 'list',
+        component: () => import('@/views/user/user-list'),
+        name: 'User',
+        meta: {
+          title: '用户管理',
+          icon: 'peoples',
+          noCache: true,
+          roles: ['admin', 'user:view']
         }
       }
     ]
